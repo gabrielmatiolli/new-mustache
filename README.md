@@ -1,1 +1,2 @@
 [![Board Status](https://dev.azure.com/gabrielmatiolli/9ba239f9-fa21-40a5-80d8-61e155b00bc7/61f6b553-4e07-45c1-96c0-91281a062229/_apis/work/boardbadge/db701bb6-14fb-4ab3-b472-8a6a02b4e54d)](https://dev.azure.com/gabrielmatiolli/9ba239f9-fa21-40a5-80d8-61e155b00bc7/_boards/board/t/61f6b553-4e07-45c1-96c0-91281a062229/Issues/)
+https://dev.azure.com/gabrielmatiolli/9ba239f9-fa21-40a5-80d8-61e155b00bc7/61f6b553-4e07-45c1-96c0-91281a062229/_apis/work/boardbadge/db701bb6-14fb-4ab3-b472-8a6a02b4e54d
