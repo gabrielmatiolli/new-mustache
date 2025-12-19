@@ -1,0 +1,144 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                  String        @id @default(uuid())
+  name                String
+  phone               String        @unique
+  verificationCode    Int?
+  verificationCodeExp DateTime?
+  appointments        Appointment[]
+}
+
+model Service {
+  id             String            @id @default(uuid())
+  name           String
+  duration       Int
+  price          Float
+  description    String?
+  imageUrl       String?
+  Appointment    Appointment[]
+  employees      EmployeeService[]
+  ShowcasePhotos ShowcasePhoto[]
+}
+
+model Employee {
+  id             String            @id @default(uuid())
+  name           String
+  imageUrl       String?
+  phone          String            @unique
+  status         EmployeeStatus    @default(ACTIVE)
+  Account        Account[]
+  appointments   Appointment[]
+  services       EmployeeService[]
+  schedule       Schedule[]
+  ShowcasePhotos ShowcasePhoto[]
+}
+
+model EmployeeService {
+  id         String   @id @default(uuid())
+  employeeId String
+  serviceId  String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  service    Service  @relation(fields: [serviceId], references: [id])
+}
+
+model Schedule {
+  id         String   @id @default(uuid())
+  employeeId String
+  weekday    Int
+  startTime  String
+  endTime    String
+  lunchStart String?
+  lunchEnd   String?
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  @@unique([employeeId, weekday])
+}
+
+model Appointment {
+  id            String               @id @default(uuid())
+  userId        String
+  employeeId    String
+  serviceId     String
+  date          DateTime
+  status        AppointmentStatus    @default(SCHEDULED)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @default(now()) @updatedAt
+  paymentMethod PaymentMethod?
+  employee      Employee             @relation(fields: [employeeId], references: [id])
+  service       Service              @relation(fields: [serviceId], references: [id])
+  user          User                 @relation(fields: [userId], references: [id])
+  products      AppointmentProduct[]
+}
+
+model Product {
+  id           String               @id @default(uuid())
+  name         String
+  price        Float
+  imageUrl     String?
+  quantity     Int
+  isFeatured   Boolean              @default(false)
+  appointments AppointmentProduct[]
+}
+
+model AppointmentProduct {
+  id            String      @id @default(uuid())
+  appointmentId String
+  productId     String
+  quantity      Int
+  price         Float
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id            String    @id @default(uuid())
+  phone         String    @unique
+  password      String
+  role          Role
+  resetToken    String?   @unique
+  resetTokenExp DateTime?
+  employeeId    String?
+  employee      Employee? @relation(fields: [employeeId], references: [id])
+}
+
+model ShowcasePhoto {
+  id          String    @id @default(uuid())
+  imageUrl    String
+  description String?
+  createdAt   DateTime  @default(now())
+  serviceId   String?
+  employeeId  String?
+  employee    Employee? @relation(fields: [employeeId], references: [id])
+  service     Service?  @relation(fields: [serviceId], references: [id])
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum PaymentMethod {
+  CASH
+  DEBIT
+  CREDIT
+  PIX
+}
+
+enum Role {
+  ADMIN
+  EMPLOYEE
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  DONE
+  CANCELED
+}
