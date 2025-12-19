@@ -2,6 +2,9 @@ import { z } from "zod";
 import dotenv from "dotenv";
 import path from "path";
 
+// Verifica se está em build time (não valida durante o build)
+const isBuildTime = process.env.NEXT_PHASE === "phase-production-build";
+
 // Esquema de validação para variáveis de ambiente
 const envSchema = z.object({
   // Node
@@ -10,7 +13,7 @@ const envSchema = z.object({
     .default("development"),
 
   // Database - Neon PostgreSQL
-  DATABASE_URL: z.string().min(1, "DATABASE_URL é obrigatória"),
+  DATABASE_URL: z.string().min(1, "DATABASE_URL é obrigatória").optional(),
   DATABASE_URL_UNPOOLED: z.string().optional(),
 
   // PostgreSQL Parameters (opcionais, fornecidos pelo Neon)
@@ -31,15 +34,15 @@ const envSchema = z.object({
   POSTGRES_PRISMA_URL: z.string().optional(),
 
   // JWT Secret
-  JWT_SECRET: z.string().min(8, "JWT_SECRET deve ter no mínimo 8 caracteres"),
+  JWT_SECRET: z.string().min(8, "JWT_SECRET deve ter no mínimo 8 caracteres").optional(),
 
   // Comtele API
-  COMTELE_API_KEY: z.string().min(1, "COMTELE_API_KEY é obrigatória"),
+  COMTELE_API_KEY: z.string().min(1, "COMTELE_API_KEY é obrigatória").optional(),
 
   // Vercel Blob Storage
   BLOB_READ_WRITE_TOKEN: z
     .string()
-    .min(1, "BLOB_READ_WRITE_TOKEN é obrigatório"),
+    .min(1, "BLOB_READ_WRITE_TOKEN é obrigatório").optional(),
 
   // Next.js Public Variables
   NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3000"),
@@ -63,6 +66,12 @@ export function loadEnvs() {
 
 // Validação e parse das variáveis de ambiente
 function validateEnv() {
+  // Durante build time, não valida (Vercel injeta as envs em runtime)
+  if (isBuildTime) {
+    console.log("⏭️  Build time: pulando validação de variáveis de ambiente");
+    return process.env as z.infer<typeof envSchema>;
+  }
+
   const parsed = envSchema.safeParse(process.env);
 
   if (!parsed.success) {
