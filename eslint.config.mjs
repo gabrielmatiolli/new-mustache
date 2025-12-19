@@ -15,6 +15,11 @@ const eslintConfig = defineConfig([
     // Custom ignores:
     "prisma/generated/**",
   ]),
+  {
+    rules: {
+      "@typescript-eslint/no-require-imports": "off"
+    }
+  }
 ]);
 
 export default eslintConfig;
