@@ -1,8 +1,6 @@
-import { GET } from "./route";
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
 
-// Mock do Prisma Client
+// Mock do Prisma Client ANTES de importar a rota
 jest.mock("@/lib/prisma", () => ({
   prisma: {
     employee: {
@@ -20,6 +18,10 @@ jest.mock("next/server", () => ({
     })),
   },
 }));
+
+// Importa a rota DEPOIS dos mocks
+import { GET } from "./route";
+import { NextResponse } from "next/server";
 
 describe("GET /api", () => {
   beforeEach(() => {
@@ -46,7 +48,10 @@ describe("GET /api", () => {
     ];
 
     (prisma.employee.findMany as jest.Mock).mockResolvedValue(mockEmployees);
-    
+
+    // Act
+    await GET();
+
     // Assert
     expect(prisma.employee.findMany).toHaveBeenCalledTimes(1);
     expect(NextResponse.json).toHaveBeenCalledWith({ employees: mockEmployees });
@@ -55,6 +60,9 @@ describe("GET /api", () => {
   it("deve retornar array vazio quando não há funcionários", async () => {
     // Arrange
     (prisma.employee.findMany as jest.Mock).mockResolvedValue([]);
+
+    // Act
+    await GET();
 
     // Assert
     expect(prisma.employee.findMany).toHaveBeenCalledTimes(1);
@@ -88,6 +96,9 @@ describe("GET /api", () => {
     ];
 
     (prisma.employee.findMany as jest.Mock).mockResolvedValue(mockEmployees);
+
+    // Act
+    await GET();
 
     // Assert
     expect(prisma.employee.findMany).toHaveBeenCalledTimes(1);
