@@ -33,6 +33,16 @@ const envSchema = z.object({
   POSTGRES_URL_NO_SSL: z.string().optional(),
   POSTGRES_PRISMA_URL: z.string().optional(),
 
+  // Redis
+  REDIS_URL: z.string().min(1, "REDIS_URL é obrigatória").optional(),
+
+  // Upstash (produção)
+  REDIS_PROD_KV_REST_API_READ_ONLY_TOKEN: z.string().min(1, "REDIS_PROD_KV_REST_API_READ_ONLY_TOKEN é obrigatória em produção").optional(),
+  REDIS_PROD_KV_REST_API_TOKEN: z.string().min(1, "REDIS_PROD_KV_REST_API_TOKEN é obrigatória em produção").optional(),
+  REDIS_PROD_KV_REST_API_URL: z.string().min(1, "REDIS_PROD_KV_REST_API_URL é obrigatória em produção").optional(),
+  REDIS_PROD_KV_URL: z.string().min(1, "REDIS_PROD_KV_URL é obrigatória em produção").optional(),
+  REDIS_PROD_REDIS_URL: z.string().min(1, "REDIS_PROD_REDIS_URL é obrigatória em produção").optional(),
+
   // JWT Secret
   JWT_SECRET: z.string().min(8, "JWT_SECRET deve ter no mínimo 8 caracteres").optional(),
 
