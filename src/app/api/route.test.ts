@@ -9,6 +9,14 @@ jest.mock("@/lib/prisma", () => ({
   },
 }));
 
+// Mock do Redis
+jest.mock("@/lib/redis", () => ({
+  setCache: jest.fn(),
+  getCache: jest.fn(),
+  deleteCache: jest.fn(),
+  deleteCachePattern: jest.fn(),
+}));
+
 // Mock do NextResponse
 jest.mock("next/server", () => ({
   NextResponse: {
@@ -22,6 +30,7 @@ jest.mock("next/server", () => ({
 // Importa a rota DEPOIS dos mocks
 import { GET } from "./route";
 import { NextResponse } from "next/server";
+import { setCache } from "@/lib/redis";
 
 describe("GET /api", () => {
   beforeEach(() => {
@@ -48,24 +57,28 @@ describe("GET /api", () => {
     ];
 
     (prisma.employee.findMany as jest.Mock).mockResolvedValue(mockEmployees);
+    (setCache as jest.Mock).mockResolvedValue(undefined);
 
     // Act
     await GET();
 
     // Assert
     expect(prisma.employee.findMany).toHaveBeenCalledTimes(1);
+    expect(setCache).toHaveBeenCalledWith("employees", mockEmployees, 600);
     expect(NextResponse.json).toHaveBeenCalledWith({ employees: mockEmployees });
   });
 
   it("deve retornar array vazio quando não há funcionários", async () => {
     // Arrange
     (prisma.employee.findMany as jest.Mock).mockResolvedValue([]);
+    (setCache as jest.Mock).mockResolvedValue(undefined);
 
     // Act
     await GET();
 
     // Assert
     expect(prisma.employee.findMany).toHaveBeenCalledTimes(1);
+    expect(setCache).toHaveBeenCalledWith("employees", [], 600);
     expect(NextResponse.json).toHaveBeenCalledWith({ employees: [] });
   });
 
@@ -96,12 +109,14 @@ describe("GET /api", () => {
     ];
 
     (prisma.employee.findMany as jest.Mock).mockResolvedValue(mockEmployees);
+    (setCache as jest.Mock).mockResolvedValue(undefined);
 
     // Act
     await GET();
 
     // Assert
     expect(prisma.employee.findMany).toHaveBeenCalledTimes(1);
+    expect(setCache).toHaveBeenCalledWith("employees", mockEmployees, 600);
     expect(NextResponse.json).toHaveBeenCalledWith({ employees: mockEmployees });
   });
 
@@ -109,6 +124,7 @@ describe("GET /api", () => {
     // Arrange
     const mockError = new Error("Database connection failed");
     (prisma.employee.findMany as jest.Mock).mockRejectedValue(mockError);
+    (setCache as jest.Mock).mockResolvedValue(undefined);
 
     // Act & Assert
     await expect(GET()).rejects.toThrow("Database connection failed");
@@ -118,11 +134,13 @@ describe("GET /api", () => {
   it("deve chamar findMany sem filtros", async () => {
     // Arrange
     (prisma.employee.findMany as jest.Mock).mockResolvedValue([]);
+    (setCache as jest.Mock).mockResolvedValue(undefined);
 
     // Act
     await GET();
 
     // Assert
     expect(prisma.employee.findMany).toHaveBeenCalledWith();
+    expect(setCache).toHaveBeenCalled();
   });
 });
