@@ -49,3 +49,4 @@ next-env.d.ts
 
 prisma/generated
 package-lock.json
+src/generated
