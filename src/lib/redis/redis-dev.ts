@@ -12,12 +12,24 @@ redisClient.on("error", (err) => console.error("Redis Client Error", err));
 // Conecta ao Redis
 let isConnected = false;
 
+let connectPromise: Promise<void> | null = null;
+
 async function connect() {
-  if (!isConnected) {
-    await redisClient.connect();
-    isConnected = true;
-    console.log("✅ Redis conectado");
+  if (isConnected) {
+    return;
   }
+  if (!connectPromise) {
+    connectPromise = (async () => {
+      try {
+        await redisClient.connect();
+        isConnected = true;
+        console.log("✅ Redis conectado");
+      } finally {
+        connectPromise = null;
+      }
+    })();
+  }
+  return connectPromise;
 }
 
 // Cache helper functions

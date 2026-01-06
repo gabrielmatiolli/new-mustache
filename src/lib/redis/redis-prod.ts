@@ -1,4 +1,4 @@
-import { Redis } from '@upstash/redis';
+import { Redis } from "@upstash/redis";
 import { loadEnvs } from "../env";
 
 loadEnvs();
@@ -41,11 +41,19 @@ export async function deleteCache(key: string): Promise<void> {
 
 export async function deleteCachePattern(pattern: string): Promise<void> {
   try {
-    // Upstash suporta keys pattern matching
-    const keys = await redis.keys(pattern);
-    if (keys.length > 0) {
-      await redis.del(...keys);
-    }
+    let cursor: string | number = 0;
+    do {
+      const result: [string | number, string[]] = await redis.scan(cursor, {
+        match: pattern,
+        count: 100,
+      });
+      cursor = result[0];
+      const keys = result[1];
+      
+      if (keys.length > 0) {
+        await redis.del(...keys);
+      }
+    } while (cursor !== 0);
   } catch (error) {
     console.error("Erro ao deletar cache por pattern:", error);
   }
